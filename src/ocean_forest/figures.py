@@ -1,15 +1,20 @@
 from pathlib import Path
 
 import numpy as np
-import pylab as pl
-from matplotlib import cm
-import pandas as pd
+try:
+    import pylab as pl
+    from matplotlib import cm
+except ModuleNotFoundError:
+    raise ModuleNotFoundError ("Matplotlib is not installed.")
 from sklearn.tree import export_graphviz
 from sklearn.inspection import permutation_importance as sklearn_perm_imp
+try:
+    import projmap
+    HAS_PROJMAP = True
+except ModuleNotFoundError:
+    HAS_PROJMAP = False
 
-import projmap
-from config import settings
-
+from .config import settings
 
 def scatter(model, ax=None, clf=True, x1=None, x2=None, title=None):
     if clf:
@@ -17,6 +22,8 @@ def scatter(model, ax=None, clf=True, x1=None, x2=None, title=None):
     ax = pl.gca() if ax is None else ax
     settings.setenv(getattr(model, 'env', 'default'))
     env = getattr(model, 'env', '')
+    datadir = Path(settings.figs_datadir) / Path(env)
+    datadir.mkdir(parents=True, exist_ok=True)
 
     r2train = model.score(model.X_train, model.y_train)
     r2test  = model.score(model.X_test,  model.y_test)
@@ -41,11 +48,11 @@ def scatter(model, ax=None, clf=True, x1=None, x2=None, title=None):
     pl.xlabel(settings.scatter_xlabel)
     pl.ylabel(settings.scatter_ylabel)
     pl.legend()
-    pl.savefig(f"figs/{filename}")
+    pl.savefig(datadir / filename)
 
 def decision_tree(model, tree=5):
     settings.setenv(getattr(model, 'env', 'default'))
-    filename = f"{env}_{{settings.fig_file_pref}_decision_tree_{tree:04}.dot"
+    filename = f"{env}_{settings.fig_file_pref}_decision_tree_{tree:04}.dot"
     if "depth" in model.X_train:
         filename = filename.replace(".dot", "_depth.dot")
     estimator = model.estimators_[tree]
@@ -53,9 +60,11 @@ def decision_tree(model, tree=5):
         feature_names = model.X_train.keys(), class_names = model.y_train.name,
         rounded = True, proportion = False, precision = 2, filled = True)
 
-def feature_importance(model=None):
-    model = rf_regression() if model is None else model
+def feature_importance(model):
     importance = model.feature_importances_
+    datadir = Path(settings.figs_datadir) / Path(model.env)
+    datadir.mkdir(parents=True, exist_ok=True)
+
 
     pl.clf()
     ax = pl.gca()
@@ -64,14 +73,16 @@ def feature_importance(model=None):
     ax.set_yticks(xlist)
     ax.set_yticklabels(model.X_train.keys())
 
-def permutation_importance(model):
+def permutation_importance(model, scoring='explained_variance'):
     """Calculate permutation importances
     
     https://scikit-learn.org/stable/modules/permutation_importance.html
     """
     settings.setenv(getattr(model, 'env', 'default'))
     env = getattr(model, 'env', '')
-    scoring = 'explained_variance'
+    datadir = Path(settings.figs_datadir) / Path(env)
+    datadir.mkdir(parents=True, exist_ok=True)
+
     pimp = sklearn_perm_imp(model, model.X_test, model.y_test, 
                             n_repeats=30, random_state=0, scoring=scoring)
     perm_sorted_idx = pimp.importances_mean.argsort()
@@ -88,10 +99,10 @@ def permutation_importance(model):
     pl.xlim(0,1)
     #fig.tight_layout()
 
-    filename = f"{env}_{settings.fig_file_pref}_permutation_feature_importances.pdf"
+    filename = f"{env}_{settings.fig_file_pref}_permutation_feature_importances_{scoring}.pdf"
     if "depth" in model.X_train:
         filename = filename.replace(".pdf", "_depth.pdf")
-    pl.savefig(f"figs/{filename}")
+    pl.savefig(datadir / filename)
 
 def residual(model, ax=None, clf=True, x1=None, x2=None):
     if clf:
@@ -99,9 +110,10 @@ def residual(model, ax=None, clf=True, x1=None, x2=None):
     ax = pl.gca() if ax is None else ax
     settings.setenv(getattr(model, 'env', 'default'))
     env = getattr(model, 'env', '')
+    datadir = Path(settings.figs_datadir) / Path(env)
+    datadir.mkdir(parents=True, exist_ok=True)
     x1 = settings.x1 if x1 is None else x1
     x2 = settings.x2 if x2 is None else x2
-
 
     filename = f"{env}_{settings.fig_file_pref}_residual.pdf"
     title   = "Residuals after RF Regression"
@@ -121,7 +133,7 @@ def residual(model, ax=None, clf=True, x1=None, x2=None):
     pl.ylabel("Residual (mg C m$^{-2}$ d$^{-1}$)")
     pl.xlabel(settings.scatter_ylabel)
     pl.legend()
-    pl.savefig(f"figs/{filename}")
+    pl.savefig(datadir / filename)
 
 def all_evaluation_figs(model):
     scatter(model)
@@ -129,6 +141,8 @@ def all_evaluation_figs(model):
     residual(model)
 
 def global_map(da, cmap=cm.nipy_spectral, title=""):
+    if not HAS_PROJMAP:
+        raise ModuleNotFoundError ("projmap is not installed.")
     pl.close("all")
     pl.figure(1, (10,8))
     mp = projmap.Map("glob")
