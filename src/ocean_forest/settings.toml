@@ -1,0 +1,20 @@
+
+[default]
+name = "pp-mattei"
+rf_params = {n_estimators=3000, max_tree_depth=200, min_samples_leaf=7}
+features = ["month", "chl", "sst", "sat_par", "Zeu", "kd_490"]
+log_features = ["chl", "pprod", "pp_obs", "ep_obs"]
+scatter_xlabel = "Observed Primary Production (mg C m$^{-2}$ d$^{-1}$)"
+scatter_ylabel = "Predicted Primary Production (mg C m$^{-2}$ d$^{-1}$)"
+x1 = 10
+x2 = 1e5
+fig_file_pref  = ""
+maxdepth = 200
+input_file = "mattei_daily_sat.h5"
+y_feature = "pp_obs"
+above_zeu = false
+
+[pp-mattei-longhurst]
+features = ["lat", "lon", "depth", "chl", "sst", "month", "sat_par",
+            "basin", "biome", "kd_490","Zeu", "ep_obs", "longhurst"]
+

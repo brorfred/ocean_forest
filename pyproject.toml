@@ -1,0 +1,28 @@
+[tool.poetry]
+name = "ocean-forest"
+version = "0.1.0"
+description = ""
+authors = ["Bror Jonsson <brorfred@gmail.com>"]
+readme = "README.md"
+packages = [{include = "ocean_forest", from = "src"}]
+
+[tool.poetry.dependencies]
+python = ">=3.9,<3.12"
+numpy = "^1.24.2"
+pandas = "^1.5.3"
+scikit-learn = "^1.2.2"
+scipy = "^1.10.1"
+linear-tree = "^0.3.5"
+joblib = "^1.2.0"
+dynaconf = "^3.1.12"
+tables = "^3.8.0"
+xgboost = "^1.7.4"
+
+
+[tool.poetry.group.dev.dependencies]
+ipython = "^8.11.0"
+pytest = "^7.2.2"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
