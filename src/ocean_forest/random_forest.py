@@ -49,6 +49,7 @@ def regress(df=None, env="pp-mattei", random_state=None, depths=True,
     if len(kw) == 0:
         kw = dict(n_estimators=3000, max_depth=200, min_samples_leaf=7)
     if rerf:
+        print("Use extended RF regressor")
         model = LinearForestRegressor(base_estimator=Lasso(), **kw)
     else:
         print("Use normal RF regressor")
