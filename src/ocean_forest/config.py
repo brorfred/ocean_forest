@@ -1,5 +1,5 @@
 
-import os, pathlib
+import os, pathlib, shutil
 
 from dynaconf import Dynaconf
 
@@ -12,9 +12,10 @@ settings = Dynaconf(
 
 # `envvar_prefix` = export envvars with `export DYNACONF_FOO=bar`.
 # `settings_files` = Load these files in the order.
-if not os.path.isfile(os.path.join(os.getcwd(), "settings.toml")):
-    print(__file__)
-    print(os.getcwd())
+srcfile = pathlib.Path(__file__).parent / "settings.toml"
+destfile = os.path.join(os.getcwd(), "settings.toml")
+if not os.path.isfile(destfile):
+    shutil.copyfile(srcfile, destfile)
     raise FileNotFoundError (
         "settings.toml is missing in the current directory \n" + 
-        "install a template by executing 'ocean_forest.install_template()'")
+        "A template is copied here, please edit as necessary.")

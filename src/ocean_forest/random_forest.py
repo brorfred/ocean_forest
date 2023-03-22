@@ -2,6 +2,7 @@
 import os 
 
 import numpy as np
+import pandas as pd
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.linear_model import LinearRegression, Lasso
 from sklearn.model_selection import train_test_split,cross_val_score
@@ -11,6 +12,12 @@ from joblib import dump as joblib_dump
 from joblib import load as joblib_load
 
 from .config import settings
+
+def load(env, datadir=None, filename=None):
+    settings.setenv(env=env)
+    datadir = settings.input_datadir if datadir is None else datadir
+    filename = settings.input_file if filename is None else filename
+    return pd.read_hdf(os.path.join(datadir, filename))
 
 def clean_data(df, env="pp-mattei", depths=False, dropna=True):
     settings.setenv(env=env)
@@ -30,8 +37,7 @@ def clean_data(df, env="pp-mattei", depths=False, dropna=True):
         df = df[df.Zeu<df.depth]
     return df[feature_keys], df[settings["y_feature"]]
 
-
-def regress(df=None, env="pp-mattei", random_state=None, depths=True, 
+def regress(df=None, env="pp-mattei", random_state=None, depths=False, 
             rerf=False, **kw):
     # evaluate random forest ensemble for regression
     # https://machinelearningmastery.com/random-forest-ensemble-in-python/

@@ -13,6 +13,8 @@ maxdepth = 200
 input_file = "mattei_daily_sat.h5"
 y_feature = "pp_obs"
 above_zeu = false
+figs_datadir = "./figs"
+input_datadir = "./indata"
 
 [pp-mattei-longhurst]
 features = ["lat", "lon", "depth", "chl", "sst", "month", "sat_par",
