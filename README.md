@@ -1,6 +1,6 @@
-# random_ocean
+# ocean_forest
 
-random_oean is a Python package to perform Random Forest regressions based on in-situ obervations of ocean properties. The main use case is Export Production, and in the future Primary Production
+ocean_forest is a Python package to perform Random Forest regressions based on in-situ obervations of ocean properties. The main use case is Primary Production based on insitu data from Mattei.
 
 ## Installation
 
