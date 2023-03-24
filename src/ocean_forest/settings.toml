@@ -1,7 +1,7 @@
 
 [default]
 name = "pp-mattei"
-rf_params = {n_estimators=3000, max_tree_depth=200, min_samples_leaf=7}
+rf_params = {n_estimators=3000, max_depth=200, min_samples_leaf=7}
 features = ["month", "chl", "sst", "sat_par", "Zeu", "kd_490"]
 log_features = ["chl", "pprod", "pp_obs", "ep_obs"]
 scatter_xlabel = "Observed Primary Production (mg C m$^{-2}$ d$^{-1}$)"

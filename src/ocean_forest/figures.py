@@ -62,6 +62,7 @@ def decision_tree(model, tree=5):
 
 def feature_importance(model):
     importance = model.feature_importances_
+    sort = np.argsort(importance)
     datadir = Path(settings.figs_datadir) / Path(model.env)
     datadir.mkdir(parents=True, exist_ok=True)
 
@@ -73,7 +74,7 @@ def feature_importance(model):
     ax.set_yticks(xlist)
     ax.set_yticklabels(model.X_train.keys())
 
-def permutation_importance(model, scoring='explained_variance'):
+def permutation_importance(model, scoring='r2', train=False):
     """Calculate permutation importances
     
     https://scikit-learn.org/stable/modules/permutation_importance.html
@@ -82,9 +83,20 @@ def permutation_importance(model, scoring='explained_variance'):
     env = getattr(model, 'env', '')
     datadir = Path(settings.figs_datadir) / Path(env)
     datadir.mkdir(parents=True, exist_ok=True)
+    filename = f"{env}_{settings.fig_file_pref}_permutation_feature_importances_{scoring}"
 
-    pimp = sklearn_perm_imp(model, model.X_test, model.y_test, 
+    if train:
+        X = model.X_train
+        y = model.y_train
+        filename += "_train"
+    else:
+        X = model.X_test
+        y = model.y_test
+        filename += "_test"
+    filename += ".pdf"
+    pimp = sklearn_perm_imp(model, X, y, 
                             n_repeats=30, random_state=0, scoring=scoring)
+    pimp.importances[pimp.importances>1] = 1
     perm_sorted_idx = pimp.importances_mean.argsort()
     tree_importance_sorted_idx = np.argsort(model.feature_importances_)
     tree_indices = np.arange(0, len(model.feature_importances_)) + 0.5
@@ -96,10 +108,9 @@ def permutation_importance(model, scoring='explained_variance'):
     )
     pl.title("Permutation Feature Importance")
     pl.xlabel("Explained variance regression score")
-    pl.xlim(0,1)
+    pl.xlim(0,1.2)
     #fig.tight_layout()
 
-    filename = f"{env}_{settings.fig_file_pref}_permutation_feature_importances_{scoring}.pdf"
     if "depth" in model.X_train:
         filename = filename.replace(".pdf", "_depth.pdf")
     pl.savefig(datadir / filename)
@@ -137,7 +148,8 @@ def residual(model, ax=None, clf=True, x1=None, x2=None):
 
 def all_evaluation_figs(model):
     scatter(model)
-    permutation_importance(model)
+    permutation_importance(model, train=True)
+    permutation_importance(model, train=False)
     residual(model)
 
 def global_map(da, cmap=cm.nipy_spectral, title=""):

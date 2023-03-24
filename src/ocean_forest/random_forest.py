@@ -1,5 +1,6 @@
 
-import os 
+import os
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -51,15 +52,16 @@ def regress(df=None, env="pp-mattei", random_state=None, depths=False,
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.33, random_state=random_state)
 
-    # define the model
-    if len(kw) == 0:
-        kw = dict(n_estimators=3000, max_depth=200, min_samples_leaf=7)
+    #Set hyper parameters
+    rfkw = settings.get("rf_params", {})
+    for key in kw:
+        rfkw[key] = kw[key]
     if rerf:
         print("Use extended RF regressor")
-        model = LinearForestRegressor(base_estimator=Lasso(), **kw)
+        model = LinearForestRegressor(base_estimator=Lasso(), **rfkw)
     else:
         print("Use normal RF regressor")
-        model = RandomForestRegressor(**kw)
+        model = RandomForestRegressor(**rfkw)
     model.env = env
     model.fit(X_train, y_train)
     model.X_test = X_test
@@ -71,7 +73,8 @@ def regress(df=None, env="pp-mattei", random_state=None, depths=False,
     return model
 
 
-def dump_model(model, filename=None):
+def dump_model(model, datadir="rf_models", filename=None):
+    Path(datadir).mkdir(parents=True, exist_ok=True)
     name = f"model_{getattr(model, 'env', '')}"
     if "depth" in model.X_train:
         name += "_with_depths"
