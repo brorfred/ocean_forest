@@ -5,7 +5,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 from sklearn.ensemble import RandomForestRegressor
-from sklearn.linear_model import LinearRegression, Lasso
+from sklearn.linear_model import Lasso
 from sklearn.model_selection import train_test_split,cross_val_score
 from sklearn.model_selection import RepeatedKFold
 from lineartree import LinearForestRegressor
@@ -24,9 +24,12 @@ def clean_data(df, env="pp-mattei", depths=False, dropna=True):
     settings.setenv(env=env)
     df = df.copy(deep=True)
     feature_keys = settings.features
-    if depths or (not settings.above_zeu): 
+    if (not settings.above_zeu) and ("depth" in df):
+        df = df[df.Zeu<df.depth]
+    if depths:
         feature_keys.append("depth")
         env = env + "_depths"
+        print("Use depth as feature")
     df = df[feature_keys + [settings["y_feature"]]]
     for key in settings.log_features:
         if key in df:
@@ -34,8 +37,6 @@ def clean_data(df, env="pp-mattei", depths=False, dropna=True):
     df.replace([np.inf, -np.inf], np.nan, inplace=True)
     if dropna:
         df.dropna(inplace=True)
-    if not settings.above_zeu:
-        df = df[df.Zeu<df.depth]
     return df[feature_keys], df[settings["y_feature"]]
 
 def regress(df=None, env="pp-mattei", random_state=None, depths=False, 
@@ -44,7 +45,7 @@ def regress(df=None, env="pp-mattei", random_state=None, depths=False,
     # https://machinelearningmastery.com/random-forest-ensemble-in-python/
     settings.setenv(env=env)
     if df is None:
-        print("load dataframe")
+        print(f"load dataframe from '{settings['INPUT_FILE']}'")
         df = load(env=env)
     else:
         df = df.copy(deep=True)

@@ -4,6 +4,7 @@ import numpy as np
 try:
     import pylab as pl
     from matplotlib import cm
+    pl.rcParams.update({'font.size': 10})
 except ModuleNotFoundError:
     raise ModuleNotFoundError ("Matplotlib is not installed.")
 from sklearn.tree import export_graphviz
@@ -48,7 +49,7 @@ def scatter(model, ax=None, clf=True, x1=None, x2=None, title=None):
     pl.xlabel(settings.scatter_xlabel)
     pl.ylabel(settings.scatter_ylabel)
     pl.legend()
-    pl.savefig(datadir / filename)
+    pl.savefig(datadir / filename, transparent=True)
 
 def decision_tree(model, tree=5):
     settings.setenv(getattr(model, 'env', 'default'))
@@ -113,7 +114,7 @@ def permutation_importance(model, scoring='r2', train=False):
 
     if "depth" in model.X_train:
         filename = filename.replace(".pdf", "_depth.pdf")
-    pl.savefig(datadir / filename)
+    pl.savefig(datadir / filename, transparent=True)
 
 def residual(model, ax=None, clf=True, x1=None, x2=None):
     if clf:
@@ -134,9 +135,11 @@ def residual(model, ax=None, clf=True, x1=None, x2=None):
 
     ax.set_title(title)
     pl.scatter(np.exp(model.predict(model.X_train)), 
-               np.exp(model.y_train - model.predict(model.X_train)), 5, label="Train")
+               np.exp(model.y_train - model.predict(model.X_train)),
+               5, alpha=0.7, linewidths=0, label="Train")
     pl.scatter(np.exp(model.predict(model.X_test)), 
-               np.exp(model.y_test - model.predict(model.X_test)), 5, label="Test")
+               np.exp(model.y_test - model.predict(model.X_test)),
+               5, alpha=0.7, linewidths=0, label="Test")
     pl.setp(ax, xscale="log", xlim=(x1,x2))
     pl.setp(ax, yscale="log", ylim=(0.001,1000))
 
@@ -144,7 +147,7 @@ def residual(model, ax=None, clf=True, x1=None, x2=None):
     pl.ylabel("Residual (mg C m$^{-2}$ d$^{-1}$)")
     pl.xlabel(settings.scatter_ylabel)
     pl.legend()
-    pl.savefig(datadir / filename)
+    pl.savefig(datadir / filename, transparent=True)
 
 def all_evaluation_figs(model):
     scatter(model)
