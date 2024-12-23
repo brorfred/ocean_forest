@@ -29,7 +29,7 @@ def clean_data(df, env="pp-mattei", depths=False, dropna=True):
     if depths:
         feature_keys.append("depth")
         env = env + "_depths"
-        print("Use depth as feature")
+        #print("Use depth as feature")
     df = df[feature_keys + [settings["y_feature"]]]
     for key in settings.log_features:
         if key in df:
