@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "ocean-forest"
-version = "0.1.0"
+version = "0.1.1"
 description = ""
 authors = ["Bror Jonsson <brorfred@gmail.com>"]
 readme = "README.md"
