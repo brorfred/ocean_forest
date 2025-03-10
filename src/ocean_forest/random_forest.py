@@ -40,7 +40,7 @@ def clean_data(df, env="pp-mattei", depths=False, dropna=True):
     return df[feature_keys], df[settings["y_feature"]]
 
 def regress(df=None, env="pp-mattei", random_state=None, depths=False, 
-            rerf=False, **kw):
+            rerf=False, test_size=0.25, xydict=None, **kw):
     # evaluate random forest ensemble for regression
     # https://machinelearningmastery.com/random-forest-ensemble-in-python/
     settings.setenv(env=env)
@@ -49,10 +49,15 @@ def regress(df=None, env="pp-mattei", random_state=None, depths=False,
         df = load(env=env)
     else:
         df = df.copy(deep=True)
-    X,y = clean_data(df, env=env, depths=depths)
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.33, random_state=random_state)
-
+    if xydict is None:
+        X,y = clean_data(df, env=env, depths=depths)
+        X_train, X_test, y_train, y_test = train_test_split(
+            X, y, test_size=test_size, random_state=random_state)
+    else:
+        X_train = xydict["X_train"]
+        X_test  = xydict["X_test"]
+        y_train = xydict["y_train"]
+        y_test  = xydict["y_test"]
     #Set hyper parameters
     rfkw = settings.get("rf_params", {})
     for key in kw:
